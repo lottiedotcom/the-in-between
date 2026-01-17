@@ -1,0 +1,124 @@
+/* style.css */
+:root {
+    /* ICY CUTECORE PALETTE */
+    --bg-color: #f0f8ff;       /* Alice Blue - The main background */
+    --glass-white: rgba(255, 255, 255, 0.7); /* Frosted Glass effect */
+    --text-color: #546e7a;     /* Blue-Grey - Softer than black */
+    --accent-color: #b3e5fc;   /* Icy Blue - For buttons/links */
+    --border-color: #e1f5fe;   /* Very light blue border */
+    --sidebar-width: 250px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace; /* Archive/Liminal feel */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR NAVIGATION */
+nav {
+    width: var(--sidebar-width);
+    background: white;
+    padding: 20px;
+    border-right: 2px solid var(--border-color);
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+}
+
+nav h1 {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #81d4fa;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+nav a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: var(--text-color);
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* MAIN CONTENT AREA */
+main {
+    margin-left: var(--sidebar-width); /* Push content right */
+    padding: 40px;
+    flex: 1;
+    display: flex;
+    gap: 30px; /* Space between article and infobox */
+}
+
+.article-content {
+    flex: 2; /* Takes up most space */
+    background: var(--glass-white);
+    padding: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(5px); /* The Blur Effect */
+    border: 1px solid white;
+    box-shadow: 0 4px 15px rgba(179, 229, 252, 0.2);
+}
+
+h2 {
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+}
+
+/* THE FANDOM INFOBOX */
+.infobox {
+    flex: 1; /* Takes up side space */
+    max-width: 300px;
+    background: white;
+    border: 4px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    height: fit-content;
+}
+
+.infobox img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.infobox-title {
+    background: var(--accent-color);
+    color: white;
+    text-align: center;
+    padding: 5px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed var(--border-color);
+    padding: 8px 0;
+    font-size: 0.9rem;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+    body { flex-direction: column; }
+    nav { position: relative; width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--border-color); }
+    main { margin-left: 0; flex-direction: column-reverse; } /* Infobox on top on mobile */
+    .infobox { max-width: 100%; }
+}
