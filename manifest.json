@@ -1,0 +1,20 @@
+{
+  "name": "The In Between",
+  "short_name": "InBetween",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f0f8ff",
+  "theme_color": "#b3e5fc",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/b3e5fc/ffffff?text=❄️",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/b3e5fc/ffffff?text=❄️",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
