@@ -5,42 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The In Between</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json"> </head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
 <body>
 
     <nav>
         <h1>The In Between</h1>
-        <a href="index.html">❄️ Home</a>
-        <a href="template.html">📄 Template (Copy Me)</a>
-        </nav>
+        
+        <div class="nav-section">
+            <button class="nav-btn active" onclick="showHome()">❄️ Home</button>
+        </div>
 
-    <main>
-        <div class="article-content">
-            <h1>Welcome to The In Between</h1>
-            <p>This is the personal archive of the Liminal World. Use the sidebar to navigate the levels, entities, and memories stored here.</p>
-            
-            <div style="background: white; padding: 20px; border-radius: 10px; border: 1px dashed #b3e5fc;">
-                <h3>System Status</h3>
-                <p>❄️ <b>Atmosphere:</b> Stable</p>
-                <p>📂 <b>Entries:</b> 1</p>
-                <p>📶 <b>Connection:</b> Offline Supported</p>
+        <div class="nav-header">
+            <span>ROOMS</span>
+            <button class="add-btn" onclick="openEditor('room')">+</button>
+        </div>
+        <div id="room-list">
             </div>
 
-            <h2>How to add a page:</h2>
-            <ol>
-                <li>Go to GitHub.</li>
-                <li>Open <code>template.html</code>.</li>
-                <li>Copy the code.</li>
-                <li>Create a new file (e.g., <code>level-0.html</code>).</li>
-                <li>Paste and fill in the blanks!</li>
-            </ol>
+        <div class="nav-header">
+            <span>ENTITIES</span>
+            <button class="add-btn" onclick="openEditor('entity')">+</button>
         </div>
+        <div id="entity-list">
+            </div>
+
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px dashed #b3e5fc;">
+             <button class="nav-btn" onclick="exportData()">💾 Backup World</button>
+        </div>
+    </nav>
+
+    <main>
+        
+        <div id="view-mode">
+            <div class="article-content">
+                <h1>Welcome to the In Between</h1>
+                <p>Select a page or create a new one to begin.</p>
+            </div>
+        </div>
+
+        <div id="edit-mode" class="hidden">
+            <div class="editor-container">
+                <h2>New Entry</h2>
+                <input type="hidden" id="entry-type">
+                
+                <label>Name</label>
+                <input type="text" id="entry-title" placeholder="e.g. The White Hallway">
+                
+                <label>Description (HTML allowed)</label>
+                <textarea id="entry-body" rows="10" placeholder="Describe the room, smells, sounds..."></textarea>
+                
+                <div id="room-fields">
+                    <label>Difficulty Class</label>
+                    <select id="room-difficulty">
+                        <option value="Safe">Safe (Blue)</option>
+                        <option value="Unsafe">Unsafe (Yellow)</option>
+                        <option value="Dead Zone">Dead Zone (Red)</option>
+                    </select>
+                    
+                    <label>Temperature</label>
+                    <input type="text" id="room-temp" placeholder="e.g. Freezing">
+                </div>
+
+                <div id="entity-fields" class="hidden">
+                    <label>Hostility</label>
+                    <select id="entity-hostility">
+                        <option value="Passive">Passive</option>
+                        <option value="Aggressive">Aggressive</option>
+                    </select>
+                    
+                    <label>Habitat</label>
+                    <input type="text" id="entity-habitat" placeholder="Where does it live?">
+                </div>
+
+                <div class="button-row">
+                    <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+                    <button class="save-btn" onclick="saveEntry()">Save Entry</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-      }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
