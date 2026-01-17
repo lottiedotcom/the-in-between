@@ -1,154 +1,44 @@
-:root {
-    --bg-color: #f0f8ff;       /* Alice Blue */
-    --glass: rgba(255, 255, 255, 0.85); 
-    --text: #546e7a;
-    --accent: #81d4fa;         /* Icy Blue */
-    --accent-dark: #29b6f6;
-    --sidebar-w: 260px;
+/* style.css - MOBILE FIX */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column; /* Stack top to bottom */
+    }
+
+    nav {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 2px solid #e1f5fe;
+        padding: 10px;
+        /* Keep the nav compact on mobile */
+        max-height: 25vh; 
+        overflow-y: scroll;
+    }
+
+    main {
+        margin-left: 0;
+        padding: 20px;
+        /* This fixes the order: Content first! */
+        display: block; 
+    }
+
+    .page-container {
+        flex-direction: column;
+    }
+
+    .infobox {
+        order: -1; /* Puts the stats card ABOVE the text on mobile */
+        margin-bottom: 20px;
+        width: 100%;
+    }
+    
+    /* Ensure the form doesn't look squished */
+    .editor-container {
+        padding: 15px;
+    }
 }
 
-body {
-    margin: 0;
-    font-family: 'Courier New', monospace;
-    background-color: var(--bg-color);
-    color: var(--text);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* SIDEBAR */
-nav {
-    width: var(--sidebar-w);
-    background: white;
-    border-right: 1px solid #e1f5fe;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-nav h1 { text-align: center; color: var(--accent-dark); font-size: 1.2rem; margin-bottom: 30px;}
-
-.nav-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: #b0bec5;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-.add-btn {
-    background: var(--accent);
-    border: none;
-    color: white;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.nav-item {
-    padding: 8px 10px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: 0.2s;
-    display: block;
-    margin-bottom: 4px;
-}
-.nav-item:hover { background: #e1f5fe; }
-
-/* MAIN CONTENT */
-main {
-    flex: 1;
-    overflow-y: auto;
-    padding: 40px;
-    position: relative;
-}
-
-/* VIEW MODE STYLES */
-.page-container {
-    display: flex;
-    gap: 30px;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.article {
-    flex: 2;
-    background: var(--glass);
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(179, 229, 252, 0.2);
-    backdrop-filter: blur(5px);
-}
-
-.infobox {
-    flex: 1;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    height: fit-content;
-    border: 3px solid #e1f5fe;
-}
-
-.infobox-header {
-    background: var(--accent);
-    color: white;
-    text-align: center;
-    padding: 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.stat {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px dashed #cfd8dc;
-    padding: 10px 0;
-    font-size: 0.9rem;
-}
-
-/* EDITOR STYLES */
-.hidden { display: none; }
-
-.editor-container {
-    background: white;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-
-input, textarea, select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #cfd8dc;
-    border-radius: 6px;
-    font-family: inherit;
-}
-
-.button-row { display: flex; gap: 10px; margin-top: 20px; }
-
-.save-btn {
-    flex: 1;
-    padding: 12px;
-    background: var(--accent-dark);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-.cancel-btn {
-    padding: 12px 20px;
-    background: #eceff1;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+/* Make sure this class is in your CSS file! */
+.hidden {
+    display: none !important;
 }
