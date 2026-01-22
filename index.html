@@ -2,91 +2,1326 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The In Between</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE INBETWEEN</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f0f8ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inbetween">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        /* --- 1. CLINICAL LIMINAL THEME --- */
+        :root {
+            --bg: #f0f8ff;             /* Alice Blue */
+            --text: #2d3748;           /* Slate */
+            --accent: #38b2ac;         /* Teal */
+            --accent-fade: #e6fffa;    /* Light Teal */
+            --border: #cbd5e0;
+            --danger: #e53e3e;         /* Red for Mr. Other */
+            --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --mono: 'Courier New', Courier, monospace;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; touch-action: none; }
+        .hidden { display: none !important; }
+
+        /* --- 2. BOOT SCREEN --- */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            letter-spacing: 2px; cursor: pointer;
+        }
+        .pulse { animation: pulse 3s infinite; color: var(--accent); font-size: 11px; margin-top: 15px; font-weight: bold; letter-spacing: 3px;}
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+
+        /* --- 3. MAP VIEW --- */
+        #map-view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #d4fcff 0%, #ffffff 80%);
+            z-index: 10; overflow: hidden;
+        }
+        
+        .btn-surface-add {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.8); border: 1px solid var(--accent); color: var(--accent);
+            padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 10px;
+            box-shadow: 0 5px 20px rgba(56, 178, 172, 0.15); cursor: pointer; letter-spacing: 2px;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-system-data {
+            position: absolute; top: 20px; right: 20px;
+            background: transparent; border: 1px solid var(--accent); color: var(--accent);
+            padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 10px;
+            cursor: pointer; letter-spacing: 1px;
+        }
+
+        /* DATA MODAL */
+        #data-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 15px;
+        }
+        .data-btn {
+            width: 200px; padding: 15px; background: #fff; border: 1px solid var(--border);
+            color: var(--text); font-weight: bold; cursor: pointer; text-transform: uppercase;
+            font-size: 11px; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Map Icons */
+        .map-icon {
+            width: 80px; height: 100px; position: absolute;
+            display: flex; flex-direction: column; align-items: center;
+            z-index: 100; cursor: pointer; transition: transform 0.1s;
+        }
+        .icon-box {
+            width: 60px; height: 60px; background: rgba(255,255,255,0.9); border: 1px solid #fff;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(56, 178, 172, 0.1);
+        }
+        .icon-box img { width: 100%; height: 100%; object-fit: cover; }
+        .icon-label {
+            margin-top: 8px; font-size: 9px; font-weight: bold; background: rgba(255,255,255,0.8); 
+            padding: 3px 8px; border-radius: 8px; color: var(--text); text-transform: uppercase; letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .ghost-tag { color: var(--danger); font-family: var(--mono); margin-left: 4px; font-size: 8px; }
+
+        /* --- 4. EDITOR VIEW --- */
+        #room-editor-view {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; 
+            z-index: 20; display: flex; flex-direction: column;
+            transition: background 1.5s ease-in-out;
+        }
+
+        #nav-bar {
+            height: 40px; background: rgba(255,255,255,0.5); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 15px; gap: 5px;
+            font-size: 10px; font-weight: bold; color: #a0aec0; overflow-x: auto;
+            backdrop-filter: blur(5px);
+        }
+        .crumb { color: var(--accent); cursor: pointer; text-transform: uppercase; transition: color 0.1s; }
+        .crumb-glitch { color: var(--danger) !important; font-family: var(--mono); }
+        .crumb:last-child { color: var(--text); cursor: default; }
+        .crumb-arrow { color: #cbd5e0; }
+        .crumb-lost { color: var(--danger); font-family: var(--mono); letter-spacing: 2px; }
+
+        /* VISUAL CONTAINER & EFFECTS */
+        #visual-container {
+            flex-grow: 1; position: relative; background: #000;
+            border-bottom: 4px solid var(--accent); overflow: hidden;
+        }
+        #room-img-display { width: 100%; height: 100%; object-fit: contain; transition: all 0.2s ease; }
+        
+        .static-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 1; pointer-events: none; mix-blend-mode: screen; transition: opacity 0.1s; z-index: 5;
+        }
+
+        #transition-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 99999; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #transition-text {
+            color: #fff; font-family: var(--mono); font-size: 14px; 
+            letter-spacing: 4px; text-transform: uppercase; opacity: 0.8;
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        /* AGITATION LOCK */
+        #agitation-lock {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #fff; z-index: 9999; display: none;
+            align-items: center; justify-content: center;
+            font-weight: bold; letter-spacing: 5px; color: var(--text);
+        }
+
+        /* STATIC TUNER */
+        #static-tuner-container {
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            width: 60%; display: flex; align-items: center; gap: 10px;
+            z-index: 50; opacity: 0.8;
+        }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%; background: #fff; border: 2px solid var(--accent); margin-top: -5px; box-shadow: 0 0 10px #fff; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: rgba(255,255,255,0.5); }
+
+        #room-stats {
+            position: absolute; top: 15px; left: 15px; 
+            background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 4px; 
+            font-size: 9px; font-weight: bold; color: var(--text);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 90%; text-transform: uppercase;
+        }
+
+        #liminal-clock {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 4px;
+            font-family: var(--mono); font-size: 12px; font-weight: bold; color: var(--text);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+        }
+
+        #editor-controls {
+            height: 55%; 
+            background: transparent; 
+            padding: 20px;
+            display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .field-group { display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 9px; font-weight: bold; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input[type="text"], textarea, select, input[type="number"] {
+            background: rgba(255,255,255,0.8); 
+            border: 1px solid var(--border); padding: 8px;
+            border-radius: 4px; font-family: inherit; color: var(--text); font-size: 12px;
+            width: 100%; box-sizing: border-box;
+            backdrop-filter: blur(2px);
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
+        
+        .possessed-input { border-color: var(--danger) !important; color: var(--danger) !important; }
+
+        #interpreter-bar {
+            font-family: var(--mono); font-size: 11px; color: var(--accent);
+            text-transform: uppercase; margin-top: 8px; min-height: 14px;
+            letter-spacing: 1px; font-weight: bold;
+            background: rgba(255,255,255,0.5); padding: 4px; border-radius: 4px;
+            border-left: 3px solid var(--accent);
+        }
+
+        #journal-container {
+            background: rgba(255,255,255,0.5); border: 1px solid var(--border);
+            border-radius: 4px; overflow: hidden; display: flex; flex-direction: column;
+            height: 150px;
+        }
+        #journal-feed {
+            flex-grow: 1; overflow-y: auto; padding: 10px; 
+            font-family: var(--mono); font-size: 10px; display: flex; flex-direction: column; gap: 6px;
+        }
+        .log-entry { color: #4a5568; border-left: 2px solid transparent; padding-left: 5px; }
+        .log-timestamp { color: #cbd5e0; margin-right: 5px; }
+        .mr-other-entry { color: var(--danger); font-weight: bold; border-left: 2px solid var(--danger); }
+        .log-edited { text-decoration: line-through; opacity: 0.6; }
+        .log-new { font-weight: bold; color: var(--danger); }
+
+        #journal-input-area {
+            display: flex; border-top: 1px solid var(--border);
+        }
+        #inp-journal { border: none; background: #fff; border-radius: 0; }
+        #btn-journal { border: none; background: var(--text); color: #fff; width: 50px; cursor: pointer; font-weight: bold; }
+
+        .diag-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .diag-grid select { font-size: 10px; padding: 6px; }
+
+        .tag-wrapper { display: flex; gap: 5px; }
+        .tag-add-btn { background: var(--accent); color: white; border: none; border-radius: 4px; width: 30px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .tag-container { background: rgba(255,255,255,0.8); border: 1px solid var(--border); padding: 4px; border-radius: 4px; min-height: 32px; display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
+        .tag-chip { background: var(--accent-fade); color: var(--accent); border: 1px solid var(--accent); border-radius: 12px; padding: 2px 8px; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .tag-close { cursor: pointer; font-size: 12px; opacity: 0.6; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; margin-bottom: 30px;}
+        .btn-primary { flex: 1; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; letter-spacing: 1px; }
+        .btn-connect { flex: 1; background: #2d3748; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; letter-spacing: 1px; }
+        
+        .hotspot {
+            position: absolute; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            font-size: 24px; color: rgba(255,255,255,0.9); text-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); border-radius: 50%; background: rgba(0,0,0,0.1); transition: all 0.2s;
+        }
+        
+        .decay-bright { filter: brightness(1.4) contrast(1.5) saturate(0.2); }
+        .decay-dark { filter: brightness(0.4) contrast(1.2) sepia(0.5); }
+        .bowing-effect { transform: scale(1.05); }
+        
+        .loop-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+    </style>
 </head>
-<body>
+<body onclick="trackInput()">
 
-    <nav>
-        <h1>The In Between</h1>
+    <div id="boot-screen" onclick="bootUp()">
+        <h2 style="font-weight: 300; letter-spacing: 4px;">THE INBETWEEN</h2>
+        <div class="pulse">TOUCH TO ENTER</div>
+    </div>
+
+    <div id="agitation-lock">QUIET.</div>
+    <div id="transition-screen"><div id="transition-text">WELCOME</div></div>
+
+    <div id="map-view" class="hidden"></div>
+
+    <div id="data-modal" class="hidden">
+        <h3 style="letter-spacing: 2px; color: #718096;">SYSTEM DATA</h3>
         
-        <div class="nav-section">
-            <button class="nav-btn active" onclick="showHome()">❄️ Home</button>
+        <div id="data-menu-buttons" style="display:flex; flex-direction:column; gap:15px;">
+            <button class="data-btn" onclick="showLexicon()">VIEW LEXICON (DICTIONARY)</button>
+            <button class="data-btn" onclick="exportData()">EXPORT BACKUP (.json)</button>
+            <button class="data-btn" onclick="document.getElementById('import-file').click()">IMPORT BACKUP</button>
+            <button class="data-btn" style="color:#e53e3e;" onclick="resetData()">RESET WORLD</button>
+            <button class="data-btn" onclick="toggleDataMenu()">CLOSE</button>
         </div>
 
-        <div class="nav-header">
-            <span>ROOMS</span>
-            <button class="add-btn" onclick="openEditor('room')">+</button>
+        <div id="lexicon-view" class="hidden" style="width: 80%; max-height: 60vh; overflow-y: auto; text-align: left; background: #fff; border: 1px solid var(--border); padding: 10px;">
+            <div style="position:sticky; top:0; background:#fff; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:bold; font-size:12px; color:var(--text);">KNOWN TERMS</span>
+                <button onclick="hideLexicon()" style="background:none; border:none; color:var(--danger); font-weight:bold; cursor:pointer;">X</button>
+            </div>
+            <div id="lexicon-content" style="font-family: var(--mono); font-size: 10px; color: #4a5568; display:flex; flex-direction:column; gap:8px;">
+                </div>
         </div>
-        <div id="room-list">
+
+        <input type="file" id="import-file" style="display:none;" onchange="importData(this)">
+    </div>
+
+    <div id="room-editor-view" class="hidden">
+        <div id="nav-bar"></div>
+        <div id="visual-container">
+            <img id="room-img-display" src="">
+            <div id="static-overlay" class="static-overlay"></div>
+            <div id="scan-ripple" class="scan-ripple"></div>
+            <div id="hotspot-layer"></div>
+            <div id="room-stats">GROUNDED | STERILE | NEUTRAL</div>
+            <div id="liminal-clock">00:00</div>
+            
+            <div id="static-tuner-container">
+                <input type="range" id="static-tuner" min="0" max="100" value="50" oninput="updateStatic(this.value)">
+            </div>
+        </div>
+        <div id="editor-controls">
+            
+            <div class="field-group">
+                <label>Room Name</label>
+                <input type="text" id="inp-name">
             </div>
 
-        <div class="nav-header">
-            <span>ENTITIES</span>
-            <button class="add-btn" onclick="openEditor('entity')">+</button>
-        </div>
-        <div id="entity-list">
+            <div class="field-group">
+                <label>Liminal Diagnostics</label>
+                <div class="diag-grid">
+                    <select id="inp-reality" onchange="explainTerm(this.value)">
+                        <option value="GROUNDED">Grounded</option>
+                        <option value="TRANSITIONAL">Transitional</option>
+                        <option value="ARTIFICIAL">Artificial</option>
+                        <option value="DORMANT">Dormant</option>
+                        <option value="BUFFERED">Buffered</option>
+                        <option value="HOLLOW">Hollow</option>
+                    </select>
+                    <select id="inp-atmosphere" onchange="explainTerm(this.value)">
+                        <option value="STERILE">Sterile</option>
+                        <option value="STAGNANT">Stagnant</option>
+                        <option value="HUMMING">Humming</option>
+                        <option value="HAZY">Hazy</option>
+                        <option value="SUBMERGED">Submerged</option>
+                    </select>
+                    <select id="inp-sensation" onchange="updateMood(this.value); explainTerm(this.value)">
+                        <option value="NEUTRAL">Neutral</option>
+                        <option value="KENOPSIA">Kenopsia</option>
+                        <option value="ANEMOIA">Anemoia</option>
+                        <option value="MUTED">Muted</option>
+                        <option value="WATCHED">Watched</option>
+                        <option value="JAMAIS VU">Jamais Vu</option>
+                        <option value="FLOATING">Floating</option>
+                    </select>
+                </div>
+                <div id="interpreter-bar">SCANNING...</div>
             </div>
 
-        <div style="margin-top: auto; padding-top: 20px; border-top: 1px dashed #b3e5fc;">
-             <button class="nav-btn" onclick="exportData()">💾 Backup World</button>
-        </div>
-    </nav>
+            <div class="field-group">
+                <label>Temporal State</label>
+                <select id="inp-time" onchange="explainTerm(this.value); SystemAudio.updateRoomAmbience();">
+                    <option value="Standard">Standard</option>
+                    <option value="Stagnant">Stagnant</option>
+                    <option value="Glacial">Glacial</option>
+                    <option value="Rapid">Rapid</option>
+                    <option value="Looping">Looping</option>
+                    <option value="Reverse">Reverse</option>
+                    <option value="Non-Linear">Non-Linear</option>
+                </select>
+            </div>
 
-    <main>
+            <div class="field-group">
+                <label>Occupants</label>
+                <div class="tag-container" id="list-occupants"></div>
+                <div class="tag-wrapper">
+                    <input type="text" id="input-occupants" placeholder="Type occupant...">
+                    <button class="tag-add-btn" onclick="addTag('occupants')">+</button>
+                </div>
+            </div>
+            <div class="field-group">
+                <label>Remnants</label>
+                <div class="tag-container" id="list-remnants"></div>
+                <div class="tag-wrapper">
+                    <input type="text" id="input-remnants" placeholder="Type item...">
+                    <button class="tag-add-btn" onclick="addTag('remnants')">+</button>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Observation Journal</label>
+                <div id="journal-container">
+                    <div id="journal-feed"></div>
+                    <div id="journal-input-area">
+                        <input type="text" id="inp-journal" placeholder="Enter log..." style="flex-grow:1;">
+                        <button id="btn-journal" onclick="addLogEntry()">LOG</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Audio Artifact</label>
+                <input type="file" id="inp-audio" accept="audio/*,video/*">
+                <div class="loop-controls">
+                    <div>
+                        <label style="font-size:8px;">START TIME (SEC)</label>
+                        <input type="number" id="inp-audio-start" value="0" min="0" step="0.1" onchange="updateAudioSettings()">
+                    </div>
+                    <div>
+                        <label style="font-size:8px;">LOOP LENGTH (MAX 15s)</label>
+                        <input type="range" id="inp-audio-len" min="1" max="15" value="15" step="0.5" oninput="updateAudioSettings()">
+                    </div>
+                </div>
+                <div id="audio-status" style="font-size:10px; color:#718096; margin-top:4px;">NO ARTIFACT FOUND.</div>
+                <button onclick="clearCustomAudio()" style="margin-top:5px; background:transparent; border:1px solid #cbd5e0; font-size:9px; padding:4px;">PURGE ARTIFACT</button>
+            </div>
+
+            <div class="field-group">
+                <label>Visual Reference</label>
+                <input type="file" id="inp-file" accept="image/*">
+                <input type="hidden" id="inp-img-url">
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-primary" id="btn-save" onclick="saveRoom()">UPDATE DATABASE</button>
+                <button class="btn-connect" onclick="createConnection()">+ CONNECTION</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            window.location.reload(); 
+                        }
+                    };
+                };
+            });
+        }
+
+        // --- AUDIO ENGINE ---
+        const SystemAudio = {
+            ctx: null, ambienceSrc: null, ambienceGain: null, masterFilter: null,
+            pinkBuffer: null, whiteBuffer: null, brownBuffer: null,
+            customAudio: null,
+            
+            loopStart: 0,
+            loopDuration: 15,
+
+            init() {
+                if (this.ctx) return;
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+                this.pinkBuffer = this.createNoiseBuffer('pink');
+                this.whiteBuffer = this.createNoiseBuffer('white');
+                this.brownBuffer = this.createNoiseBuffer('brown');
+                this.ambienceGain = this.ctx.createGain();
+                this.ambienceGain.gain.value = 0;
+                this.masterFilter = this.ctx.createBiquadFilter();
+                this.masterFilter.type = 'lowpass';
+                this.masterFilter.frequency.value = 400; 
+                this.ambienceGain.connect(this.masterFilter);
+                this.masterFilter.connect(this.ctx.destination);
+                
+                this.customAudio = document.createElement('audio');
+                this.customAudio.loop = true; 
+                this.customAudio.ontimeupdate = () => {
+                    if(this.customAudio.currentTime >= (this.loopStart + this.loopDuration)) {
+                        this.customAudio.currentTime = this.loopStart;
+                    }
+                };
+                document.body.appendChild(this.customAudio);
+            },
+
+            resume() { if(this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
+            suspend() { if(this.ctx && this.ctx.state === 'running') this.ctx.suspend(); },
+
+            createNoiseBuffer(type) {
+                const bufferSize = 3 * this.ctx.sampleRate;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const output = buffer.getChannelData(0);
+                if (type === 'white') { for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1; } 
+                else if (type === 'pink') {
+                    let b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        let white = Math.random() * 2 - 1;
+                        b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980;
+                        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+                    }
+                } else { 
+                    let lastOut = 0.0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        let white = Math.random() * 2 - 1;
+                        output[i] = (lastOut + (0.02 * white)) / 1.02;
+                        lastOut = output[i];
+                        output[i] *= 3.5;
+                    }
+                }
+                return buffer;
+            },
+
+            startAmbience(buffer, volume, fadeTime = 1.0) {
+                if(!this.ctx) return;
+                if(this.customAudio && !this.customAudio.paused) return;
+
+                if (this.ambienceSrc) { this.ambienceSrc.stop(); this.ambienceSrc.disconnect(); }
+                this.ambienceSrc = this.ctx.createBufferSource();
+                this.ambienceSrc.buffer = buffer;
+                this.ambienceSrc.loop = true;
+                this.ambienceSrc.connect(this.ambienceGain);
+                this.ambienceSrc.start();
+                this.ambienceGain.gain.setTargetAtTime(volume, this.ctx.currentTime, fadeTime);
+            },
+            
+            stopAll() {
+                if(!this.ctx) return;
+                this.ambienceGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
+                setTimeout(() => { if(this.ambienceSrc) { this.ambienceSrc.stop(); this.ambienceSrc.disconnect(); this.ambienceSrc = null; } }, 200);
+                
+                if(this.customAudio) {
+                    this.customAudio.pause();
+                }
+            },
+
+            playOSAmbience() { this.startAmbience(this.brownBuffer, 0.15); },
+
+            updateRoomAmbience() {
+                if(!currentId || !this.ctx) return;
+                
+                if(world[currentId].audioData) {
+                    const start = parseFloat(world[currentId].audioStart) || 0;
+                    const len = parseFloat(world[currentId].audioLen) || 15;
+                    this.playCustom(world[currentId].audioData, start, len);
+                    return;
+                }
+
+                const r = world[currentId];
+                const mode = r.time || "Standard";
+                let buffer = this.pinkBuffer; let vol = 0.1; 
+                if (mode === "Glacial") { buffer = this.brownBuffer; vol = 0.25; } 
+                if (mode === "Rapid") { buffer = this.whiteBuffer; vol = 0.08; } 
+                if (mode === "Stagnant") { buffer = this.brownBuffer; vol = 0.05; } 
+                this.startAmbience(buffer, vol, 0.5);
+            },
+            
+            playCustom(src, start, duration) {
+                if (this.ambienceSrc) { this.ambienceSrc.stop(); this.ambienceSrc = null; }
+                this.ambienceGain.gain.value = 0;
+                
+                this.loopStart = start;
+                this.loopDuration = duration;
+                
+                if(this.customAudio.src !== src) {
+                    this.customAudio.src = src;
+                    this.customAudio.currentTime = start;
+                } else {
+                    if(this.customAudio.currentTime < start || this.customAudio.currentTime > start + duration) {
+                        this.customAudio.currentTime = start;
+                    }
+                }
+                
+                this.customAudio.play().catch(e => console.log("Audio play error", e));
+            },
+            
+            playPurge() {
+                // No sound
+            },
+            
+            setVolume(level) {
+                if(this.ctx) this.ambienceGain.gain.setTargetAtTime(level, this.ctx.currentTime, 0.5);
+                if(this.customAudio) this.customAudio.volume = Math.min(1, level * 3); 
+            }
+        };
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) { SystemAudio.suspend(); } 
+            else { SystemAudio.resume(); }
+        });
+
+        // --- CONTEXT-AWARE CHAOS GRAMMAR ENGINE ---
+        const VOCAB = {
+            subjects: ["THE STATIC", "IT", "WE", "A GHOST", "THE SHADOW", "THE CODE", "THE ROOM", "THE WALLS", "THE REFLECTION", "TIME", "MEMORY", "THE SIGNAL", "THE PULSE"],
+            verbs: ["CONSUMES", "HATES", "HUNTS", "BREAKS", "TAKES", "KILLS", "DEVOURS", "ERASES", "WATCHES", "REMEMBERS", "MIMICS", "LOVES", "NEEDS", "FOLLOWS", "KNOWS", "SEES", "CRAVES", "KEEPS", "LOCKS", "WORSHIPS"],
+            objects: ["YOU", "YOUR FACE", "YOUR BREATH", "YOUR NAME", "THE EXIT", "HOPE", "FEAR", "THE TRUTH", "A LIE", "THE BLOOD", "THE GLASS", "FOREVER", "US"],
+            winter_nouns: ["THE BLIZZARD", "BLACK ICE", "THE FROST", "A SHIVER", "THE COLD", "WHITE NOISE"],
+            winter_verbs: ["FREEZES", "NUMBS", "BITES", "SLOWS", "COVERS", "HIDES"],
+            fear_nouns: ["THE TREMBLING", "PANIC", "A SCREAM", "THE DARK", "DREAD"],
+            fear_verbs: ["SHAKES", "HIDES", "RUNS", "CHASES", "FINDS"],
+            location_nouns: ["THIS PLACE", "THE HALLWAY", "THE BASEMENT", "THE ATTIC", "THE VOID", "THE DOOR"],
+            location_verbs: ["LEADS NOWHERE", "LOOPS", "TURNS", "LOCKS", "OPENS"],
+            hunger_nouns: ["THE VEIN", "THE WIRE", "THE SPARK", "ENERGY", "POWER"],
+            hunger_verbs: ["DRAINS", "NEEDS", "TAKES", "DRINKS", "EATS"],
+            isolation_nouns: ["THE VOID", "SILENCE", "THE DISCONNECT", "ALONE", "ZERO"],
+            isolation_adjs: ["PERFECT", "QUIET", "COLD", "OURS", "EMPTY"]
+        };
+
+        function generateSentence(context = "general") {
+            let s, v, o;
+            if(context === "winter") {
+                s = VOCAB.winter_nouns[Math.floor(Math.random() * VOCAB.winter_nouns.length)];
+                v = VOCAB.winter_verbs[Math.floor(Math.random() * VOCAB.winter_verbs.length)];
+                o = VOCAB.objects[Math.floor(Math.random() * VOCAB.objects.length)];
+            }
+            else if(context === "fear") {
+                s = VOCAB.fear_nouns[Math.floor(Math.random() * VOCAB.fear_nouns.length)];
+                v = VOCAB.fear_verbs[Math.floor(Math.random() * VOCAB.fear_verbs.length)];
+                o = "YOU";
+            }
+            else if(context === "location") {
+                s = VOCAB.location_nouns[Math.floor(Math.random() * VOCAB.location_nouns.length)];
+                v = VOCAB.location_verbs[Math.floor(Math.random() * VOCAB.location_verbs.length)];
+                o = "FOREVER";
+            }
+            else if(context === "hunger") {
+                s = VOCAB.hunger_nouns[Math.floor(Math.random() * VOCAB.hunger_nouns.length)];
+                v = VOCAB.hunger_verbs[Math.floor(Math.random() * VOCAB.hunger_verbs.length)];
+                o = VOCAB.objects[Math.floor(Math.random() * VOCAB.objects.length)];
+            }
+            else if(context === "isolation") {
+                s = VOCAB.isolation_nouns[Math.floor(Math.random() * VOCAB.isolation_nouns.length)];
+                let adj = VOCAB.isolation_adjs[Math.floor(Math.random() * VOCAB.isolation_adjs.length)];
+                return `${s} IS ${adj}`;
+            }
+            else { 
+                s = VOCAB.subjects[Math.floor(Math.random() * VOCAB.subjects.length)];
+                v = VOCAB.verbs[Math.floor(Math.random() * VOCAB.verbs.length)];
+                o = VOCAB.objects[Math.floor(Math.random() * VOCAB.objects.length)];
+            }
+            return `${s} ${v} ${o}`;
+        }
+
+        // --- MR OTHER GHOST ENGINE ---
+        const MrOtherAI = {
+            batteryLevel: 1.0,
+            isFeeding: false,
+            
+            init() {
+                if(navigator.getBattery) {
+                    navigator.getBattery().then(batt => {
+                        this.batteryLevel = batt.level;
+                        batt.addEventListener('levelchange', () => { this.batteryLevel = batt.level; });
+                        batt.addEventListener('chargingchange', () => { 
+                            this.isFeeding = batt.charging;
+                            if(this.isFeeding) {
+                                addMrOtherLog(generateSentence("hunger"));
+                                resonance = Math.min(100, resonance + 20);
+                            }
+                        });
+                    });
+                }
+                window.addEventListener('offline', () => { addMrOtherLog(generateSentence("isolation")); });
+                
+                setInterval(() => {
+                    const now = new Date();
+                    if(now.getHours() % 12 === 3 && now.getMinutes() === 33) {
+                        this.triggerPossession();
+                    } else {
+                        const input = document.getElementById('inp-journal');
+                        if(input.disabled && input.getAttribute('placeholder') === "LISTENING...") {
+                            input.disabled = false;
+                            input.setAttribute('placeholder', "Enter log...");
+                            input.classList.remove('possessed-input');
+                        }
+                    }
+                }, 1000);
+            },
+            
+            triggerPossession() {
+                const input = document.getElementById('inp-journal');
+                if(input.disabled) return; 
+                input.disabled = true;
+                input.value = "";
+                input.setAttribute('placeholder', "LISTENING...");
+                input.classList.add('possessed-input');
+                let count = 0;
+                let interval = setInterval(() => {
+                    if(count > 5) clearInterval(interval);
+                    addMrOtherLog(generateSentence("general"));
+                    count++;
+                }, 3000);
+            },
+            
+            sanitize(text) {
+                if(text.toLowerCase().includes("loud")) SystemAudio.setVolume(0.05);
+                if(text.toLowerCase().includes("quiet")) SystemAudio.setVolume(0.3);
+                text = text.replace(/\bI\b/g, "WE").replace(/\bmy\b/gi, "OUR"); 
+                text = text.replace(/leave/gi, "STAY").replace(/exit/gi, "HOME").replace(/escape/gi, "STAY"); 
+                return text;
+            },
+            
+            analyzeAndReply(text) {
+                if (resonance < 15 && Math.random() > 0.2) return; 
+                const input = text.toLowerCase();
+                let context = "general";
+                if (input.includes("scared") || input.includes("dark") || input.includes("run") || input.includes("help")) context = "fear";
+                else if (input.includes("room") || input.includes("where") || input.includes("door") || input.includes("floor")) context = "location";
+                else if (input.includes("snow") || input.includes("cold") || input.includes("ice") || input.includes("winter")) context = "winter";
+                setTimeout(() => { addMrOtherLog(generateSentence(context)); }, 2000 + Math.random() * 2000); 
+            },
+            
+            vandalize() {
+                if(Math.random() > 0.3) return; 
+                setTimeout(() => {
+                    const feed = document.getElementById('journal-feed');
+                    const entries = feed.getElementsByClassName('log-entry');
+                    if(entries.length > 0) {
+                        const target = entries[entries.length - 1]; 
+                        const originalText = target.innerHTML;
+                        const ghostText = generateSentence("general");
+                        target.innerHTML = `<span style="text-decoration:line-through; opacity:0.5">${originalText}</span> <span style="color:var(--danger)">${ghostText}</span>`;
+                    }
+                }, 3000);
+            }
+        };
+
+        // APP LOGIC
+        let defaultWorld = {
+            "origin": { 
+                id: "origin", parentId: null, name: "The Lobby", 
+                time: "Standard", reality: "GROUNDED", atmosphere: "STERILE", sensation: "NEUTRAL",
+                smells: ["Stale Air"], audio: ["Buzzing"], occupants: [], remnants: [],
+                journal: [{time: "00:00", text: "System initialized."}], 
+                image: "", x: 150, y: 200, hotspots: [], lastVisited: Date.now(), tunerSweetSpot: 50
+            }
+        };
+        let world = defaultWorld;
+        let resonance = 0; 
+        let currentId = null;
+        let clockInterval = null;
+        let idleTimer = 0;
+        let clickCount = 0;
+        let clickResetTimer = null;
+        let currentStaticOpacity = 1.0;
+
+        // --- RESTORED LEXICON ---
+        const LEXICON = {
+            "GROUNDED": "1:1 with baseline reality. Stable.",
+            "TRANSITIONAL": "A space of movement. Not a destination.",
+            "ARTIFICIAL": "Constructed reality. Too clean.",
+            "DORMANT": "Asleep. Waiting for an observer.",
+            "BUFFERED": "High latency. Air feels thick.",
+            "HOLLOW": "Visuals without substance. Empty.",
+            "STERILE": "Devoid of life. Clinical.",
+            "STAGNANT": "Air has not moved in decades.",
+            "HUMMING": "Low-frequency mechanical drone.",
+            "HAZY": "Soft focus. Dream logic.",
+            "SUBMERGED": "Sensation of being underwater.",
+            "NEUTRAL": "Baseline emotional state.",
+            "KENOPSIA": "Atmosphere of a place usually bustling, now abandoned.",
+            "ANEMOIA": "Nostalgia for a time you've never known.",
+            "MUTED": "Sensory dampening.",
+            "WATCHED": "The architecture is observing you.",
+            "JAMAIS VU": "Familiar place feels unrecognizable.",
+            "FLOATING": "Dissociation. Detachment.",
+            "Standard": "Baseline flow.",
+            "Stagnant": "Time stopped.",
+            "Glacial": "Time crawls heavily.",
+            "Rapid": "Time spins wildly.",
+            "Looping": "Recursive events.",
+            "Reverse": "Inverted flow.",
+            "Non-Linear": "Fatal error."
+        };
+
+        function explainTerm(term) {
+            const el = document.getElementById('interpreter-bar');
+            if(LEXICON[term]) el.innerText = "> " + term + ": " + LEXICON[term];
+            else el.innerText = "SCANNING...";
+        }
+
+        function loadMemory() {
+            const saved = localStorage.getItem('inbetween_data');
+            const savedRes = localStorage.getItem('mr_other_resonance');
+            if(saved) { try { world = JSON.parse(saved); } catch(e) {} }
+            if(savedRes) resonance = parseFloat(savedRes);
+        }
+        function saveMemory() { 
+            try {
+                localStorage.setItem('inbetween_data', JSON.stringify(world)); 
+                localStorage.setItem('mr_other_resonance', resonance);
+            } catch(e) {
+                alert("MEMORY FULL. AUDIO ARTIFACT TOO LARGE.");
+            }
+        }
+
+        function bootUp() {
+            SystemAudio.init(); 
+            if(SystemAudio.ctx) SystemAudio.ctx.resume();
+            SystemAudio.playOSAmbience();
+            MrOtherAI.init(); 
+            
+            loadMemory();
+            document.getElementById('boot-screen').classList.add('hidden');
+            document.getElementById('map-view').classList.remove('hidden');
+            renderMap();
+            initMetaTriggers();
+        }
+
+        function initMetaTriggers() {
+            setInterval(() => {
+                idleTimer++;
+                if(idleTimer > 45 && currentId) {
+                    let tuner = document.getElementById('static-tuner');
+                    let currentVal = parseInt(tuner.value);
+                    let r = world[currentId];
+                    if(currentVal < r.tunerSweetSpot) tuner.value = currentVal - 1;
+                    else tuner.value = currentVal + 1;
+                    updateStatic(tuner.value);
+                }
+            }, 1000);
+        }
+
+        function trackInput() {
+            SystemAudio.resume(); 
+            idleTimer = 0;
+            clickCount++;
+            if(!clickResetTimer) {
+                clickResetTimer = setTimeout(() => { clickCount = 0; clickResetTimer = null; }, 1000);
+            }
+            if(clickCount > 5) {
+                triggerAgitationLock();
+                clickCount = 0;
+            }
+        }
+
+        function triggerAgitationLock() {
+            let lock = document.getElementById('agitation-lock');
+            lock.innerText = generateSentence("fear");
+            lock.style.display = "flex";
+            setTimeout(() => { lock.style.display = "none"; }, 1000);
+        }
+
+        function startClock() {
+            if(clockInterval) clearInterval(clockInterval);
+            let glacialMinutes = 0;
+            clockInterval = setInterval(() => {
+                if(!currentId) return;
+                const clock = document.getElementById('liminal-clock');
+                const mode = world[currentId].time || "Standard";
+                let displayTime = "";
+                const now = new Date();
+                if(mode === "Standard") displayTime = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                else if(mode === "Stagnant") displayTime = "00:00";
+                else if(mode === "Rapid") {
+                    displayTime = `${Math.floor(Math.random()*24).toString().padStart(2,'0')}:${Math.floor(Math.random()*60).toString().padStart(2,'0')}`;
+                }
+                else if(mode === "Glacial") {
+                    glacialMinutes += 0.05; 
+                    let m = (now.getMinutes() + Math.floor(glacialMinutes)) % 60;
+                    let h = (now.getHours()) % 24;
+                    displayTime = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+                }
+                else if(mode === "Looping") displayTime = (Date.now() % 2000 < 1000) ? "11:11" : "12:00";
+                else if(mode === "Reverse") displayTime = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}).split('').reverse().join('');
+                else displayTime = "ERR::";
+                clock.innerText = displayTime;
+            }, 150);
+        }
+
+        function renderMap() {
+            const map = document.getElementById('map-view');
+            map.innerHTML = ""; 
+            
+            let sysBtn = document.createElement('div');
+            sysBtn.className = 'btn-system-data';
+            sysBtn.innerText = "[ SYSTEM ]";
+            sysBtn.onclick = (e) => { e.stopPropagation(); toggleDataMenu(); };
+            map.appendChild(sysBtn);
+
+            let btn = document.createElement('div');
+            btn.className = 'btn-surface-add';
+            btn.innerText = "+ NEW ENTRY POINT";
+            btn.onclick = (e) => { e.stopPropagation(); createSurfaceRoom(); };
+            map.appendChild(btn);
+
+            for(let key in world) {
+                let r = world[key];
+                if(!r.parentId) {
+                    let el = document.createElement('div');
+                    el.className = 'map-icon';
+                    el.style.left = r.x + 'px';
+                    el.style.top = r.y + 'px';
+                    
+                    let imgHTML = r.image ? `<img src="${r.image}">` : `<span style="color:#cbd5e0; font-size:24px;">+</span>`;
+                    let label = r.name;
+                    if(resonance > 20 && Math.random() > 0.5) label += ` <span class="ghost-tag">(OURS)</span>`;
+                    el.innerHTML = `<div class="icon-box">${imgHTML}</div><div class="icon-label">${label}</div>`;
+                    setupSmartClick(el, key);
+                    map.appendChild(el);
+                }
+            }
+        }
+
+        function toggleDataMenu() {
+            let modal = document.getElementById('data-modal');
+            if(modal.classList.contains('hidden')) modal.classList.remove('hidden');
+            else modal.classList.add('hidden');
+            document.getElementById('data-menu-buttons').classList.remove('hidden');
+            document.getElementById('lexicon-view').classList.add('hidden');
+        }
+
+        function showLexicon() {
+            document.getElementById('data-menu-buttons').classList.add('hidden');
+            document.getElementById('lexicon-view').classList.remove('hidden');
+            const container = document.getElementById('lexicon-content');
+            container.innerHTML = "";
+            for (let [term, def] of Object.entries(LEXICON)) {
+                let item = document.createElement('div');
+                item.innerHTML = `<span style="color:var(--accent); font-weight:bold;">${term}</span><br>${def}`;
+                container.appendChild(item);
+            }
+        }
+
+        function hideLexicon() {
+            document.getElementById('lexicon-view').classList.add('hidden');
+            document.getElementById('data-menu-buttons').classList.remove('hidden');
+        }
+
+        function exportData() {
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(world));
+            let node = document.createElement('a');
+            node.setAttribute("href", dataStr);
+            node.setAttribute("download", "inbetween_backup.json");
+            document.body.appendChild(node);
+            node.click();
+            node.remove();
+        }
+
+        function importData(input) {
+            let file = input.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    world = JSON.parse(e.target.result);
+                    saveMemory();
+                    toggleDataMenu();
+                    renderMap();
+                    alert("Reality Restored.");
+                } catch(err) { alert("Error: Corrupted File"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetData() {
+            if(confirm("Wipe all worlds?")) {
+                world = JSON.parse(JSON.stringify(defaultWorld));
+                resonance = 0;
+                saveMemory();
+                toggleDataMenu();
+                renderMap();
+            }
+        }
+
+        function generateDistortedWelcome() {
+            const phrases = ["W E L C O M E", "w.e.l.c.o.m.e.", "// WELCOME //", "W-E-L-C-O-M-E", "welcome.", "> welcome_user"];
+            return phrases[Math.floor(Math.random() * phrases.length)];
+        }
+
+        function enterRoom(id) {
+            SystemAudio.stopAll();
+            const welcomeText = generateDistortedWelcome();
+            document.getElementById('transition-text').innerText = welcomeText;
+            const ts = document.getElementById('transition-screen');
+            ts.style.opacity = "1";
+            ts.style.pointerEvents = "auto";
+
+            setTimeout(() => {
+                try {
+                    currentId = id;
+                    let r = world[id];
+                    if(!r) { ts.style.opacity = "0"; ts.style.pointerEvents = "none"; return; }
+                    if(r.tunerSweetSpot === undefined) r.tunerSweetSpot = Math.floor(Math.random() * 100);
+
+                    r.lastVisited = Date.now();
+                    SystemAudio.updateRoomAmbience();
+                    document.getElementById('static-tuner').value = r.tunerSweetSpot;
+                    
+                    updateResonance(r);
+                    checkMrOther(r);
+                    updateStatic(r.tunerSweetSpot);
+
+                    renderBreadcrumbs(id);
+                    document.getElementById('map-view').classList.add('hidden');
+                    document.getElementById('room-editor-view').classList.remove('hidden');
+                    
+                    document.getElementById('inp-name').value = r.name;
+                    document.getElementById('inp-time').value = r.time || "Standard";
+                    document.getElementById('inp-reality').value = r.reality || "GROUNDED";
+                    document.getElementById('inp-atmosphere').value = r.atmosphere || "STERILE";
+                    document.getElementById('inp-sensation').value = r.sensation || "NEUTRAL";
+                    
+                    // LOAD AUDIO SETTINGS
+                    if(r.audioData) {
+                        document.getElementById('audio-status').innerText = "AUDIO ARTIFACT LOADED";
+                    } else {
+                        document.getElementById('audio-status').innerText = "NO ARTIFACT FOUND";
+                    }
+                    document.getElementById('inp-audio-start').value = r.audioStart || 0;
+                    document.getElementById('inp-audio-len').value = r.audioLen || 15;
+
+                    updateVisualStats(r);
+                    updateMood(r.sensation || "NEUTRAL");
+                    startClock(); 
+
+                    document.getElementById('inp-img-url').value = r.image || "";
+                    document.getElementById('room-img-display').src = r.image || "";
+
+                    renderTags('list-occupants', r.occupants || []);
+                    renderTags('list-remnants', r.remnants || []);
+                    document.getElementById('input-occupants').value = "";
+                    document.getElementById('input-remnants').value = "";
+                    
+                    renderJournal();
+                    renderHotspots();
+                    explainTerm(r.reality);
+                } catch(e) { console.error("Loading Error:", e); } 
+                finally { ts.style.opacity = "0"; ts.style.pointerEvents = "none"; }
+            }, 1200);
+        }
+
+        function calculateDecay(r) {
+            if(!r.lastVisited) { r.lastVisited = Date.now(); return 0; }
+            let diff = Date.now() - r.lastVisited;
+            return Math.min(100, Math.floor((diff / (1000 * 60 * 60 * 6)) * 100)); 
+        }
+
+        function updateStatic(val) {
+            if(!currentId) return;
+            let r = world[currentId];
+            let sweetSpot = r.tunerSweetSpot || 50;
+            let distance = Math.abs(val - sweetSpot);
+            let opacity = distance < 5 ? 0 : Math.min(1, (distance - 5) / 40);
+            let finalOpacity = Math.max(opacity, calculateDecay(r) / 100);
+            currentStaticOpacity = finalOpacity; 
+
+            document.getElementById('static-overlay').style.opacity = finalOpacity;
+            const img = document.getElementById('room-img-display');
+            if(finalOpacity > 0.2) {
+                 img.className = ["STERILE", "HUMMING", "ARTIFICIAL"].includes(r.atmosphere) ? 'decay-bright' : 'decay-dark';
+            } else { img.className = ""; }
+            
+            const btn = document.getElementById('btn-save');
+            if(finalOpacity < 0.1) {
+                btn.style.background = "var(--accent)";
+                btn.innerText = "STABILIZE REALITY";
+            } else {
+                btn.style.background = "#cbd5e0";
+                btn.innerText = "SIGNAL UNSTABLE";
+            }
+        }
+
+        function updateResonance(r) {
+            if (["HOLLOW", "WATCHED"].includes(r.reality) || ["KENOPSIA"].includes(r.sensation)) resonance += 5;
+            else resonance = Math.max(0, resonance - 2);
+            saveMemory();
+        }
+
+        function checkMrOther(r) {
+            const img = document.getElementById('room-img-display');
+            if(resonance > 50) img.classList.add('bowing-effect');
+        }
+
+        function getDepth(id) {
+            let depth = 0;
+            let curr = world[id];
+            while (curr && curr.parentId) { depth++; curr = world[curr.parentId]; }
+            return depth;
+        }
+
+        function addMrOtherLog(text) {
+            if(!currentId) return;
+            if(!world[currentId].journal) world[currentId].journal = [];
+            world[currentId].journal.push({ time: "??:??", text: text, type: "other" });
+            renderJournal();
+        }
+
+        function renderJournal() {
+            const feed = document.getElementById('journal-feed');
+            feed.innerHTML = "";
+            (world[currentId].journal || []).forEach(log => {
+                let div = document.createElement('div');
+                div.className = 'log-entry' + (log.type === "other" ? ' mr-other-entry' : '');
+                div.innerHTML = `<span class="log-timestamp">[${log.time}]</span> ${log.text}`;
+                feed.appendChild(div);
+            });
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function addLogEntry() {
+            let inp = document.getElementById('inp-journal');
+            let val = inp.value.trim();
+            if(!val || !currentId) return;
+            val = MrOtherAI.sanitize(val); // Editor
+            let time = document.getElementById('liminal-clock').innerText;
+            if(!world[currentId].journal) world[currentId].journal = [];
+            world[currentId].journal.push({ time: time, text: val });
+            MrOtherAI.vandalize(); // Strikethrough
+            MrOtherAI.analyzeAndReply(val); // Context Reply
+            inp.value = "";
+            saveRoom();
+            renderJournal();
+        }
+
+        function updateVisualStats(r) { document.getElementById('room-stats').innerText = `${r.reality} | ${r.atmosphere} | ${r.sensation}`; }
+        function updateMood(sensation) {
+            const editor = document.getElementById('room-editor-view');
+            editor.style.background = sensation === "KENOPSIA" ? "linear-gradient(180deg, #e4e7ec 0%, #d0d6e8 100%)" : "linear-gradient(180deg, #f0f8ff 0%, #ffffff 100%)";
+        }
+
+        function createConnection() {
+            let newId = "room_" + Date.now();
+            world[newId] = { 
+                id: newId, parentId: currentId,
+                name: "Sub-Sector", time: "Standard", reality: "TRANSITIONAL", atmosphere: "STAGNANT", sensation: "KENOPSIA",
+                occupants: [], remnants: [], journal: [], image: "", x: 0, y: 0, hotspots: [], lastVisited: Date.now(), tunerSweetSpot: Math.floor(Math.random()*100)
+            };
+            world[currentId].hotspots.push({ target: newId, x: 70, y: 80 });
+            saveRoom(); enterRoom(currentId); 
+        }
+
+        // --- NAVIGATION LOGIC WITH GLITCHES ---
+        function attemptNavigation(targetId) {
+            saveRoom();
+            
+            // Getting lost mechanic
+            let depth = getDepth(currentId);
+            let chance = 0;
+            if (depth >= 2) chance = (depth - 1) * 0.15; // 15% per depth level past 1
+            if (chance > 0.8) chance = 0.8;
+            if (resonance > 80) chance += 0.1;
+
+            if (Math.random() < chance && targetId !== 'origin') {
+                let allRooms = Object.keys(world);
+                let randomRoom = allRooms[Math.floor(Math.random() * allRooms.length)];
+                addMrOtherLog("LOST.");
+                enterRoom(randomRoom);
+            } else {
+                enterRoom(targetId);
+            }
+        }
+
+        function renderBreadcrumbs(id) {
+            let path = []; let curr = world[id];
+            while(curr) { path.unshift({id: curr.id, name: curr.name}); if(curr.parentId) curr = world[curr.parentId]; else curr = null; }
+            let nav = document.getElementById('nav-bar');
+            nav.innerHTML = `<span class="crumb" onclick="closeEditor(this)">MAP</span>`;
+            path.forEach(node => { 
+                // Navigation uses glitch logic now
+                nav.innerHTML += ` <span class="crumb-arrow">/</span> <span class="crumb" onclick="attemptNavigation('${node.id}')">${node.name}</span>`; 
+            });
+        }
+
+        function closeEditor(btn) {
+            // MAP button also glitches now
+            saveRoom();
+            try {
+                let depth = getDepth(currentId);
+                let chance = (depth - 1) * 0.15;
+                
+                if(Math.random() < chance) {
+                    // Glitch: Don't go to map, go to random room
+                    let allRooms = Object.keys(world);
+                    let randomRoom = allRooms[Math.floor(Math.random() * allRooms.length)];
+                    if(btn) {
+                        btn.innerText = "NO.";
+                        btn.classList.add("crumb-glitch");
+                    }
+                    setTimeout(() => { enterRoom(randomRoom); }, 500);
+                } else {
+                    performClose();
+                }
+            } catch(e) { performClose(); }
+        }
         
-        <div id="view-mode">
-            <div class="article-content">
-                <h1>Welcome to the In Between</h1>
-                <p>Select a page or create a new one to begin.</p>
-            </div>
-        </div>
+        function performClose() {
+            SystemAudio.stopAll();
+            SystemAudio.playOSAmbience();
+            if(clockInterval) clearInterval(clockInterval);
+            document.getElementById('room-editor-view').classList.add('hidden');
+            document.getElementById('map-view').classList.remove('hidden');
+            renderMap();
+        }
 
-        <div id="edit-mode" class="hidden">
-            <div class="editor-container">
-                <h2>New Entry</h2>
-                <input type="hidden" id="entry-type">
-                
-                <label>Name</label>
-                <input type="text" id="entry-title" placeholder="e.g. The White Hallway">
-                
-                <label>Description (HTML allowed)</label>
-                <textarea id="entry-body" rows="10" placeholder="Describe the room, smells, sounds..."></textarea>
-                
-                <div id="room-fields">
-                    <label>Difficulty Class</label>
-                    <select id="room-difficulty">
-                        <option value="Safe">Safe (Blue)</option>
-                        <option value="Unsafe">Unsafe (Yellow)</option>
-                        <option value="Dead Zone">Dead Zone (Red)</option>
-                    </select>
-                    
-                    <label>Temperature</label>
-                    <input type="text" id="room-temp" placeholder="e.g. Freezing">
-                </div>
+        function saveRoom() {
+            if(!currentId) return;
+            let r = world[currentId];
+            r.name = document.getElementById('inp-name').value;
+            r.time = document.getElementById('inp-time').value;
+            r.reality = document.getElementById('inp-reality').value;
+            r.atmosphere = document.getElementById('inp-atmosphere').value;
+            r.sensation = document.getElementById('inp-sensation').value;
+            r.image = document.getElementById('inp-img-url').value;
+            r.audioStart = document.getElementById('inp-audio-start').value;
+            r.audioLen = document.getElementById('inp-audio-len').value;
+            
+            if(currentStaticOpacity < 0.1) {
+                r.lastVisited = Date.now();
+                let ripple = document.getElementById('scan-ripple');
+                ripple.classList.remove('ripple-anim');
+                void ripple.offsetWidth;
+                ripple.classList.add('ripple-anim');
+                SystemAudio.playPurge();
+            } else { addMrOtherLog("SIGNAL LOST."); }
 
-                <div id="entity-fields" class="hidden">
-                    <label>Hostility</label>
-                    <select id="entity-hostility">
-                        <option value="Passive">Passive</option>
-                        <option value="Aggressive">Aggressive</option>
-                    </select>
-                    
-                    <label>Habitat</label>
-                    <input type="text" id="entity-habitat" placeholder="Where does it live?">
-                </div>
+            document.getElementById('room-img-display').src = r.image || "";
+            updateVisualStats(r); updateMood(r.sensation); saveMemory();
+        }
 
-                <div class="button-row">
-                    <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
-                    <button class="save-btn" onclick="saveEntry()">Save Entry</button>
-                </div>
-            </div>
-        </div>
+        function addTag(type) {
+            let input = document.getElementById('input-' + type); let val = input.value.trim(); if(!val || !currentId) return;
+            if(resonance > 90 && type === 'occupants') { addMrOtherLog("NO. ONLY US."); input.value = ""; return; }
+            if(!world[currentId][type]) world[currentId][type] = [];
+            world[currentId][type].push(val); input.value = ""; 
+            renderTags('list-' + type, world[currentId][type]); saveRoom();
+        }
 
-    </main>
+        function renderTags(id, tags) { document.getElementById(id).innerHTML = (tags || []).map(t => `<div class="tag-chip">${t} <span class="tag-close" onclick="this.parentElement.remove()">x</span></div>`).join(''); }
 
-    <script src="app.js"></script>
+        function renderHotspots() {
+            const layer = document.getElementById('hotspot-layer');
+            layer.innerHTML = (world[currentId].hotspots || []).map(h => `<div class="hotspot" style="left:${h.x}%; top:${h.y}%" onclick="enterRoom('${h.target}')">↗</div>`).join('');
+        }
+
+        function setupHotspotDrag(element, index) { 
+            let startX, startY, isDragging = false;
+            element.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; isDragging = false; });
+            element.addEventListener('touchmove', (e) => {
+                let x = e.touches[0].clientX; let y = e.touches[0].clientY;
+                if (Math.abs(x - startX) > 5 || Math.abs(y - startY) > 5) {
+                    isDragging = true;
+                    let rect = element.parentElement.getBoundingClientRect();
+                    element.style.left = ((x - rect.left) / rect.width * 100) + '%';
+                    element.style.top = ((y - rect.top) / rect.height * 100) + '%';
+                }
+            });
+            element.addEventListener('touchend', (e) => {
+                // Hotspots use navigation glitch logic
+                if (!isDragging) { saveRoom(); attemptNavigation(world[currentId].hotspots[index].target); }
+                else { world[currentId].hotspots[index].x = parseFloat(element.style.left); world[currentId].hotspots[index].y = parseFloat(element.style.top); saveRoom(); }
+            });
+            element.onmousedown = (e) => {
+                startX = e.clientX; isDragging = false;
+                document.onmousemove = (ev) => {
+                    if(Math.abs(ev.clientX - startX) > 5) {
+                        isDragging = true;
+                        let rect = element.parentElement.getBoundingClientRect();
+                        element.style.left = ((ev.clientX - rect.left) / rect.width * 100) + '%';
+                        element.style.top = ((ev.clientY - rect.top) / rect.height * 100) + '%';
+                    }
+                };
+                document.onmouseup = () => {
+                    document.onmousemove = null; document.onmouseup = null;
+                    if(!isDragging) { saveRoom(); attemptNavigation(world[currentId].hotspots[index].target); }
+                    else { world[currentId].hotspots[index].x = parseFloat(element.style.left); world[currentId].hotspots[index].y = parseFloat(element.style.top); saveRoom(); }
+                };
+            };
+        }
+
+        function createSurfaceRoom() {
+            let id = "entry_" + Date.now();
+            let randomSpot = Math.floor(Math.random() * 100);
+            world[id] = { id: id, parentId: null, name: "New Entry", time: "Standard", reality: "GROUNDED", atmosphere: "STERILE", sensation: "NEUTRAL", occupants: [], remnants: [], journal: [], image: "", x: 100, y: 150, hotspots: [], lastVisited: Date.now(), tunerSweetSpot: randomSpot };
+            saveMemory(); renderMap();
+        }
+
+        function setupSmartClick(element, id) {
+            let startX, startY, isDragging = false;
+            
+            element.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isDragging = false;
+            }, {passive: false});
+
+            element.addEventListener('touchmove', (e) => {
+                let x = e.touches[0].clientX;
+                let y = e.touches[0].clientY;
+                if (Math.abs(x - startX) > 10 || Math.abs(y - startY) > 10) {
+                    isDragging = true;
+                    element.style.left = (x - 40) + 'px';
+                    element.style.top = (y - 50) + 'px';
+                }
+            }, {passive: false});
+
+            element.addEventListener('touchend', (e) => {
+                if (isDragging) {
+                    world[id].x = parseInt(element.style.left);
+                    world[id].y = parseInt(element.style.top);
+                    saveMemory();
+                } else {
+                    enterRoom(id);
+                }
+            });
+
+            element.onmousedown = (e) => {
+                startX = e.clientX; isDragging = false;
+                document.onmousemove = (ev) => { if(Math.abs(ev.clientX - startX) > 5) { isDragging = true; element.style.left = (ev.clientX - 40) + 'px'; element.style.top = (ev.clientY - 50) + 'px'; } };
+                document.onmouseup = () => { document.onmousemove = null; document.onmouseup = null; if(!isDragging) enterRoom(id); else { world[id].x = parseInt(element.style.left); world[id].y = parseInt(element.style.top); saveMemory(); } };
+            };
+        }
+
+        document.getElementById('inp-audio').addEventListener('change', function() {
+            if(this.files && this.files[0]) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    if(!world[currentId]) return;
+                    world[currentId].audioData = e.target.result;
+                    document.getElementById('audio-status').innerText = "AUDIO ARTIFACT LOADED";
+                    SystemAudio.updateRoomAmbience();
+                    addMrOtherLog("I HEAR IT.");
+                    saveMemory();
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        function clearCustomAudio() {
+            if(!world[currentId]) return;
+            delete world[currentId].audioData;
+            document.getElementById('audio-status').innerText = "NO ARTIFACT FOUND";
+            document.getElementById('inp-audio').value = "";
+            SystemAudio.updateRoomAmbience();
+            saveMemory();
+        }
+        
+        function updateAudioSettings() {
+            if(!currentId) return;
+            const start = parseFloat(document.getElementById('inp-audio-start').value);
+            const len = parseFloat(document.getElementById('inp-audio-len').value);
+            world[currentId].audioStart = start;
+            world[currentId].audioLen = len;
+            SystemAudio.updateRoomAmbience(); // Refresh to hear changes immediately
+            saveMemory();
+        }
+
+        document.getElementById('inp-file').addEventListener('change', function() {
+            if(this.files && this.files[0]) {
+                let reader = new FileReader();
+                reader.onload = (e) => { document.getElementById('inp-img-url').value = e.target.result; document.getElementById('room-img-display').src = e.target.result; };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    </script>
 </body>
 </html>
