@@ -1,26 +1,33 @@
-/* sw.js */
-const CACHE_NAME = 'in-between-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/template.html',
-  '/style.css',
-  '/manifest.json'
+const CACHE_NAME = 'inbetween-v17.0-LABYRINTH';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.png'
 ];
 
-// Install the Service Worker and Cache Files
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
     })
   );
 });
 
-// Serve Cached Files when Offline
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
+    caches.match(event.request).then(response => {
       return response || fetch(event.request);
     })
   );
